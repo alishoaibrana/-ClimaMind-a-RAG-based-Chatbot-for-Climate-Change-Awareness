@@ -58,9 +58,10 @@ def get_api_key(key_name):
             value = None
     return value
 
+API = get_api_keyn("GROQ_API_KEY")
+
 llm = ChatGroq(
-    groq_api_key=get_api_keyn("GROQ_API_KEY"),
-    st.write("Key loaded:", groq_api_key[:5] + "..." if TOMTOM_API_KEY else "❌ NOT LOADED")
+    groq_api_key=API,
     model_name="openai/gpt-oss-120b",  # fast + free tier
     temperature=0.3
 )
