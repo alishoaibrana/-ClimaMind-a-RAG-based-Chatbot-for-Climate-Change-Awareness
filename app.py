@@ -48,9 +48,19 @@ memory = ConversationBufferMemory(
     return_messages=True
 )
 
+def get_api_key(key_name):
+    # pehle .env se try karo, nahi mile to streamlit secrets se
+    value = os.getenv(key_name)
+    if value is None:
+        try:
+            value = st.secrets[key_name]
+        except Exception:
+            value = None
+    return value
 
 llm = ChatGroq(
-    groq_api_key=os.environ["GROQ_API_KEY"],
+    groq_api_key=get_api_keyn("GROQ_API_KEY"),
+    st.write("Key loaded:", groq_api_key[:5] + "..." if TOMTOM_API_KEY else "❌ NOT LOADED")
     model_name="openai/gpt-oss-120b",  # fast + free tier
     temperature=0.3
 )
