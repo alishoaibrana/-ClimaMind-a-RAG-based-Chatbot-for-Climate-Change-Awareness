@@ -58,11 +58,15 @@ def get_api_key(key_name):
             value = None
     return value
 
-API = get_api_keyn("GROQ_API_KEY")
+API = get_api_key("GROQ_API_KEY")
+
+if not API:
+    st.error(".cant find Groq API key")
+    st.stop()
 
 llm = ChatGroq(
     groq_api_key=API,
-    model_name="openai/gpt-oss-120b",  # fast + free tier
+    model_name="openai/gpt-oss-120b",
     temperature=0.3
 )
 
