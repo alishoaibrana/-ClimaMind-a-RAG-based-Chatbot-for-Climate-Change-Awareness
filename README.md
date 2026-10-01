@@ -1,102 +1,101 @@
-ClimaMind Context-Aware Climate Chatbot (RAG + Groq)
+# 🌍 ClimaMind — RAG AI Chatbot with Voice & Document Search
 
-ClimaMind is a Retrieval-Augmented Generation (RAG) chatbot that answers questions about Global Warming and Climate Change, grounded in a custom knowledge base. It combines LangChain, Groq's ultra-fast LLM inference, and FAISS vector search to deliver accurate, context-aware, multiturn conversations.
+A full-stack, context-aware Retrieval-Augmented Generation (RAG) AI assistant built with **FastAPI**, **LangChain**, **Groq LLMs**, **FAISS**, and **React (Vite + Tailwind CSS)**.
 
-Features
+Features real-time document search, Google OAuth 2.0 multi-user authentication, voice-to-text input with **Whisper Large v3 Turbo**, and permanent SQLite chat history persistence.
 
+---
 
-Retrieval-Augmented Generation (RAG): answers are grounded in a curated knowledge base instead of relying purely on the LLM's internal knowledge, reducing hallucination.
-History-Aware Retrieval: reformulates follow-up questions using chat history so the retriever understands context (e.g., "what about its effects?" after asking about CO2 emissions).
-Multi-turn Conversational Memory: maintains per-session chat history using LangChain's RunnableWithMessageHistory.
-Fast Inference with Groq: powered by the openai/gpt-oss-120b model served on Groq's LPU inference engine for near-instant responses.
-Free, Local Embeddings: uses HuggingFace's all-MiniLM-L6-v2 sentence-transformer model (runs on CPU, no API cost).
-Simple, Clean UI: built entirely with Streamlit, no frontend code required.
+## ✨ Features
 
+- 🧠 **Context-Aware RAG Pipeline**: Powered by LangChain, Groq LLM, and FAISS vector embeddings with history-aware query reformulation.
+- 📄 **Multi-Format Document Ingestion**: Upload PDF, DOCX, TXT, XLSX, and CSV documents to index and chat with custom files dynamically.
+- 🎙️ **Voice Speech-to-Text**: Real-time microphone audio recording with instant transcription powered by **Groq Whisper Large v3 Turbo**.
+- 🔐 **Google OAuth 2.0 Authentication**: Secure sign-in with JWT token exchange and user-isolated data.
+- 💾 **Permanent SQLite Storage**: Chat sessions, message history, and user metadata are saved permanently in local SQLite (`rag_chatbot.db`).
+- 🎨 **Modern Sleek UI**: Built with React, Tailwind CSS, Lucide icons, glassmorphism, and responsive design.
 
+---
 
-How It Works
+## 🏗️ Architecture
 
+```
+RAG-Chatbot-LangChain/
+├── backend/
+│   ├── main.py               # FastAPI application & API endpoints
+│   ├── auth.py               # Google OAuth & JWT authentication
+│   ├── models.py             # SQLAlchemy models (User, ChatSession, ChatMessage)
+│   ├── database.py           # SQLite database engine & session factory
+│   ├── document_loader.py    # Multi-format document parser & splitter
+│   ├── config.py             # App configuration & environment loader
+│   ├── .env.example          # Environment variables template
+│   └── requirements.txt      # Python dependencies
+├── frontend/
+│   ├── src/
+│   │   ├── components/       # UI Components (ChatPanel, Sidebar, MessageInput, EmptyState)
+│   │   ├── context/          # React Auth Context
+│   │   ├── pages/            # Login & OAuth callback handlers
+│   │   └── services/         # Axios API client
+│   ├── package.json          # Node dependencies
+│   └── tailwind.config.js    # Styling configuration
+└── knowledge_base.txt        # Default global warming knowledge base
+```
 
-Document Loading: Climate-related knowledge is loaded from knowledge_base.txt.
-Chunking: The document is split into overlapping chunks (chunk_size=500, chunk_overlap=50) using RecursiveCharacterTextSplitter for better retrieval granularity.
-Embedding: Each chunk is converted into a vector using the all-MiniLM-L6-v2 HuggingFace embedding model.
-Vector Store: Chunks are indexed in a FAISS vector store for fast similarity search.
-History Aware Retriever: Given the chat history and a new question, the LLM reformulates it into a standalone question (so context isn't lost across turns).
-Retrieval + Answer Generation: Relevant chunks are retrieved and passed to the Groq LLM along with the question to generate a concise, grounded answer.
-Session Memory: Each conversation session stores its own chat history in st.session_state, enabling coherent multi-turn dialogue.
+---
 
+## 🚀 Quick Start
 
-User Question
-     |
-     v
-[History-Aware Retriever] --> reformulates question using chat history
-     |
-     v
-[FAISS Vector Search] --> retrieves top relevant chunks from knowledge_base.txt
-     |
-     v
-[Groq LLM + QA Prompt] --> generates concise, context-grounded answer
-     |
-     v
-Answer displayed in Streamlit UI
+### 1. Backend Setup
 
+```bash
+# Navigate to project root
+# Create and activate virtual environment
+python -m venv chatbotenv
+chatbotenv\Scripts\activate       # On Windows
+# source chatbotenv/bin/activate  # On macOS/Linux
 
-Tech Stack
+# Install dependencies
+pip install -r backend/requirements.txt
 
-LayerTechnologyFrontend / UIStreamlitLLM InferenceGroq (openai/gpt-oss-120b)OrchestrationLangChain (langchain, langchain-core, langchain-community, langchain-groq)Vector StoreFAISSEmbeddingsHuggingFace Sentence Transformers (all-MiniLM-L6-v2)Environment Configpython-dotenv / Streamlit SecretsLanguagePython
+# Configure environment variables
+cp backend/.env.example backend/.env
+# Open backend/.env and add your GROQ_API_KEY and Google OAuth credentials
 
+# Start backend server
+uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
+```
 
-Installation & Local Setup
+### 2. Frontend Setup
 
+```bash
+# In a second terminal:
+cd frontend
 
-Clone the repository
+# Install Node dependencies
+npm install
 
+# Start Vite dev server
+npm run dev
+```
 
-bash   git clone https://github.com/<your-username>/ClimaMind.git
-   cd ClimaMind
+### 3. Open Application
+Open [http://localhost:5173](http://localhost:5173) in your browser.
 
+---
 
-Create a virtual environment (recommended)
+## 🔑 Environment Configuration (`backend/.env`)
 
+| Variable | Description |
+| :--- | :--- |
+| `GROQ_API_KEY` | Your Groq API key (for LLM and Whisper STT) |
+| `GOOGLE_CLIENT_ID` | Google Cloud Console OAuth Client ID |
+| `GOOGLE_CLIENT_SECRET`| Google Cloud Console OAuth Client Secret |
+| `GOOGLE_REDIRECT_URI` | `http://localhost:8000/auth/google/callback` |
+| `JWT_SECRET` | Secret key for signing user JWT tokens |
+| `SESSION_SECRET_KEY` | Secret key for Starlette session middleware |
+| `FRONTEND_URL` | `http://localhost:5173` |
 
-bash   python -m venv venv
-   source venv/bin/activate   # On Windows: venv\Scripts\activate
+---
 
-
-Install dependencies
-
-
-bash   pip install -r requirements.txt
-
-
-Set up your API key
-Create a .env file in the project root:
-
-
-env   GROQ_API_KEY=your_groq_api_key_here
-
-Get a free API key from console.groq.com.
-
-
-Add your knowledge base
-Place your climate/global-warming content in knowledge_base.txt in the project root.
-Run the app
-
-
-bash   streamlit run new_app.py
-
-
-requirements.txt (reference)
-
-streamlit
-python-dotenv
-langchain
-langchain-core
-langchain-community
-langchain-groq
-langchain-text-splitters
-faiss-cpu
-sentence-transformers
-huggingface-hub
-
-(Pin exact versions in your actual requirements.txt to avoid dependency conflicts on Streamlit Cloud.)
+## 🛡️ License
+MIT License.

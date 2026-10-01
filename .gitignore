@@ -1,0 +1,42 @@
+# Virtual environments
+chatbotenv/
+venv/
+env/
+ENV/
+
+# Secrets & Environment variables (IMPORTANT: Keep API keys private)
+.env
+backend/.env
+frontend/.env
+*.env
+*.env.local
+
+# Database & SQLite files
+rag_chatbot.db
+*.db
+*.sqlite3
+
+# Vector stores & indexes
+faiss_index/
+vectorstore/
+vectorstores/
+
+# Python cache & build
+__pycache__/
+*.pyc
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+
+# Node & Frontend
+node_modules/
+frontend/node_modules/
+frontend/dist/
+
+# OS & Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

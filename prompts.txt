@@ -1,0 +1,100 @@
+Task 1 
+
+I'm migrating an existing Streamlit RAG chatbot project (LangChain + FAISS + Groq + HuggingFace embeddings) into a FastAPI backend + React frontend architecture.
+
+Do NOT touch the existing Streamlit app.py yet — keep it working as reference.
+
+Task for this step only:
+1. Create a new folder structure:
+   /backend (FastAPI app)
+   /frontend (will be React, scaffold later)
+2. Inside /backend, set up a FastAPI app with:
+   - main.py with a basic FastAPI instance and a health-check GET /health endpoint
+   - a config.py that loads GROQ_API_KEY from a .env file using python-dotenv
+   - requirements.txt for FastAPI, uvicorn, langchain, langchain-groq, langchain-community, faiss-cpu, sentence-transformers, python-dotenv, python-multipart
+3. Add CORS middleware allowing requests from http://localhost:3000 (for future React frontend)
+4. Confirm the server runs with `uvicorn main:app --reload` and /health returns {"status": "ok"}
+
+Do not implement RAG logic, file upload, or chat endpoints yet — just this skeleton. Show me the folder structure and files created when done.
+
+Task 2
+
+Continuing the FastAPI backend from before. Now implement document ingestion.
+
+Task for this step only:
+1. Create a POST /upload endpoint that accepts a file (PDF, DOCX, TXT, XLSX, CSV) via multipart form-data
+2. Add a document loader module that:
+   - Uses PyPDFLoader (or pypdf) for PDF
+   - Uses python-docx or Docx2txtLoader for DOCX
+   - Reads TXT directly
+   - Uses pandas or UnstructuredExcelLoader for XLSX
+   - Uses pandas for CSV
+3. Chunk the extracted text using LangChain's RecursiveCharacterTextSplitter (chunk_size=500, chunk_overlap=50)
+4. Embed chunks using HuggingFace all-MiniLM-L6-v2 and store them in a FAISS vector store, scoped per uploaded file/session (use a unique session_id or file_id)
+5. Return a JSON response confirming file processed, number of chunks created, and the session_id/file_id to use for querying
+
+Do not implement the chat/query endpoint yet. Just uploading and indexing. Test with one sample file of each type and show me the output.
+
+task 3 
+
+Continuing the FastAPI backend. Now implement the RAG chat endpoint using the FAISS index created in the upload step.
+
+Task for this step only:
+1. Create a POST /chat endpoint accepting: { "session_id": str, "message": str }
+2. Load the FAISS vector store for that session_id
+3. Implement history-aware retrieval (like the original Streamlit app) using LangChain's create_history_aware_retriever, so follow-up questions are reformulated using chat history
+4. Use ChatGroq (openai/gpt-oss-120b model) to generate the final grounded answer from retrieved chunks
+5. For now, store chat history in-memory per session_id (a simple Python dict is fine — we'll persist to a database in a later step)
+6. Return the answer as JSON: { "answer": str, "session_id": str }
+
+Do not add database persistence yet. Just get the RAG chat loop working end-to-end via FastAPI. Test with a sample uploaded file and multi-turn questions, show me the results.
+
+task 4 
+
+Continuing the FastAPI backend. Now implement the RAG chat endpoint using the FAISS index created in the upload step.
+
+Task for this step only:
+1. Create a POST /chat endpoint accepting: { "session_id": str, "message": str }
+2. Load the FAISS vector store for that session_id
+3. Implement history-aware retrieval (like the original Streamlit app) using LangChain's create_history_aware_retriever, so follow-up questions are reformulated using chat history
+4. Use ChatGroq (openai/gpt-oss-120b model) to generate the final grounded answer from retrieved chunks
+5. For now, store chat history in-memory per session_id (a simple Python dict is fine — we'll persist to a database in a later step)
+6. Return the answer as JSON: { "answer": str, "session_id": str }
+
+Do not add database persistence yet. Just get the RAG chat loop working end-to-end via FastAPI. Test with a sample uploaded file and multi-turn questions, show me the results.
+
+task 5
+
+Now build the React frontend for this RAG chatbot. The FastAPI backend (from previous steps) already exposes: POST /upload, POST /chat, GET /sessions, GET /sessions/{id}/messages, DELETE /sessions/{id}.
+
+Task for this step only:
+1. Scaffold a React app (Vite, not create-react-app) in /frontend with Tailwind CSS
+2. Build the layout:
+   - Left sidebar: list of past chat sessions (fetched from GET /sessions), each clickable to load its messages, with a "New Chat" button and delete icon per session
+   - Main panel: chat message thread (user messages right-aligned, assistant left-aligned, similar visual style to ChatGPT/Claude), a message input box at the bottom, and a file upload button/dropzone near the input
+3. Wire up:
+   - File upload → calls POST /upload, shows uploading state, stores returned session_id
+   - Sending a message → calls POST /chat with session_id and message, appends both to the thread
+   - Clicking a past session → calls GET /sessions/{id}/messages and loads it into the main panel
+4. Basic loading and error states (e.g., "thinking..." indicator while waiting for /chat response)
+
+Keep styling clean and minimal for now — we can refine visuals later. Show me the running app and folder structure when done.
+
+task 6
+
+Now build the React frontend for this RAG chatbot. The FastAPI backend (from previous steps) already exposes: POST /upload, POST /chat, GET /sessions, GET /sessions/{id}/messages, DELETE /sessions/{id}.
+
+Task for this step only:
+1. Scaffold a React app (Vite, not create-react-app) in /frontend with Tailwind CSS
+2. Build the layout:
+   - Left sidebar: list of past chat sessions (fetched from GET /sessions), each clickable to load its messages, with a "New Chat" button and delete icon per session
+   - Main panel: chat message thread (user messages right-aligned, assistant left-aligned, similar visual style to ChatGPT/Claude), a message input box at the bottom, and a file upload button/dropzone near the input
+3. Wire up:
+   - File upload → calls POST /upload, shows uploading state, stores returned session_id
+   - Sending a message → calls POST /chat with session_id and message, appends both to the thread
+   - Clicking a past session → calls GET /sessions/{id}/messages and loads it into the main panel
+4. Basic loading and error states (e.g., "thinking..." indicator while waiting for /chat response)
+
+Keep styling clean and minimal for now — we can refine visuals later. Show me the running app and folder structure when done.
+
+
